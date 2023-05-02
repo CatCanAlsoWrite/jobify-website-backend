@@ -1,5 +1,7 @@
 import mongoose from 'mongoose'
 import validator from 'validator'
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken'
 
 const UserSchema = new mongoose.Schema({
   name: {
@@ -23,6 +25,7 @@ const UserSchema = new mongoose.Schema({
     required: [true, 'Please provide password'],
     minlength: 6,
     trim: true,
+    select: false, //???`not to show password in the frontend by default(eg '.findOne()'), except when '.create()'(but can be solved with hard code 'json({user:{...}})' in 'controller.js' (03))`
   },
   location: {
     type: String,
@@ -37,5 +40,23 @@ const UserSchema = new mongoose.Schema({
     default: 'last name',
   },
 })
+
+/*use 'schema.pre' to create function which will be called before action 'save', use 'bcrypt' to hash password, then can hide it in the frontend/backend*/
+UserSchema.pre('save', async function () {
+  // console.log(this.password)
+  const salt = await bcrypt.genSalt(10)
+  this.password = await bcrypt.hash(this.password, salt)
+})
+
+/*use 'schema.method' to create 'createJWT(JSON web token)' function , and call it in 'controller.js'*/
+// UserSchema.method('createJWT', function () {
+//   console.log(this)
+// }) //`print data created when call 'createJWT()' function directly in 'controller.js' (01)`
+
+UserSchema.method('createJWT', function () {
+  return jwt.sign({ userID: this._id }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_LIFETIME,
+  }) //expiresIn: how long a token is valid
+}) //`use 'jsonwebtoken' to securely transmitting information when call 'createJWT()' function directly in 'controller.js' (02)`
 
 export default mongoose.model('User', UserSchema)
