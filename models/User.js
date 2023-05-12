@@ -25,7 +25,7 @@ const UserSchema = new mongoose.Schema({
     required: [true, 'Please provide password'],
     minlength: 6,
     trim: true,
-    select: false, //???`not to show password in the frontend by default(eg '.findOne()'), except when '.create()'(but can be solved with hard code 'json({user:{...}})' in 'controller.js' (03))`
+    select: false, //`not to show password in the frontend by default(eg '.findOne()') in 'controller.js' (001), except when '.create()'(but can be solved with hard code 'json({user:{...}})')`
   },
   location: {
     type: String,
@@ -48,7 +48,7 @@ UserSchema.pre('save', async function () {
   this.password = await bcrypt.hash(this.password, salt)
 })
 
-/*use 'schema.method' to create 'createJWT(JSON web token)' function , and call it in 'controller.js'*/
+/*use 'schema.method' to create 'createJWT(JSON web token)' function, and call it in 'controller.js'*/
 // UserSchema.method('createJWT', function () {
 //   console.log(this)
 // }) //`print data created when call 'createJWT()' function directly in 'controller.js' (01)`
@@ -58,5 +58,11 @@ UserSchema.method('createJWT', function () {
     expiresIn: process.env.JWT_LIFETIME,
   }) //expiresIn: how long a token is valid
 }) //`use 'jsonwebtoken' to securely transmitting information when call 'createJWT()' function directly in 'controller.js' (02)`
+
+/*use 'schema.method' to create 'comparePassword' function, use 'bcrypt' to compare password, and call it in 'controller.js'*/
+UserSchema.method('comparePassword', async function (candidatePassword) {
+  const isMatch = await bcrypt.compare(candidatePassword, this.password)
+  return isMatch
+})
 
 export default mongoose.model('User', UserSchema)

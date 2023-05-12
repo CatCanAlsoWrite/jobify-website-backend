@@ -1,5 +1,5 @@
 .env
-/node_modules
+
 
 #add frontend code in another folder
 /client

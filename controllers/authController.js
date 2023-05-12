@@ -78,7 +78,7 @@ import { StatusCodes } from 'http-status-codes'
 // }
 
 /*(6)use 'index.js' in 'errors' folder to tidy codes */
-import { BadRequestError } from '../errors/index.js'
+import { BadRequestError, UnauthenticatedError } from '../errors/index.js'
 
 const register = async (req, res) => {
   const { name, email, password } = req.body
@@ -100,25 +100,59 @@ const register = async (req, res) => {
 
   /*(02)call 'createJWT()' function with variable*/
   // const token = user.createJWT()
-  // res.status(StatusCodes.CREATED).json({ user, token })
+  // res.status(StatusCodes.CREATED).json({ user, token, location })
 
-  /*(03)call 'createJWT()' function with only part of data showing in the frontend*/
+  /*(03)call 'createJWT()' function, and hard code to show only part of data in the frontend*/
+  // const token = user.createJWT()
+  // res.status(StatusCodes.CREATED).json({
+  //   user: {
+  //     name: user.name,
+  //     lastName: user.lastName,
+  //     email: user.email,
+  //     location: user.location,
+  //   },
+  //   token,
+  //   location: user.location,
+  // })
+
+  /*(04)use 'user.password=undefined' to short the code*/
   const token = user.createJWT()
+  user.password = undefined
+  user._id = undefined
+  user.__v = undefined
+
   res.status(StatusCodes.CREATED).json({
-    user: {
-      name: user.name,
-      lastName: user.lastName,
-      email: user.email,
-    },
+    user,
     token,
-  })
+    location: user.location,
+  }) //???'user._id = undefined' doesn't work?
 }
 
 const login = async (req, res) => {
-  const user = await User.findOne({ email })
+  // const user = await User.findOne({ email })
+  // res.status(StatusCodes.OK).json({ user })
 
-  res.status(StatusCodes.OK).json({ user })
+  const { email, password } = req.body
+
+  if (!email || !password) {
+    throw new BadRequestError('Please provide all values')
+  }
+
+  const user = await User.findOne({ email }).select('+password')
+  if (!user) {
+    throw new UnauthenticatedError('Invalid credentials')
+  }
+
+  const isPasswordCorrect = await user.comparePassword(password)
+  if (!isPasswordCorrect) {
+    throw new UnauthenticatedError('Invalid credentials')
+  }
+
+  const token = user.createJWT()
+  user.password = undefined
+  res.status(StatusCodes.OK).json({ user, token, location: user.location })
 }
+
 const updateUser = async (req, res) => {
   res.send('updateUser')
 }

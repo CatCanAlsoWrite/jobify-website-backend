@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 import 'express-async-errors'
 // import cors from 'cors' //`see frontend 'Dashboard.js'(1)`
+import morgan from 'morgan' //`HTTP request logger middleware for node.js`
 
 import connectDB from './DB/connectDB.js'
 
@@ -14,6 +15,11 @@ import jobRouters from './routers/jobRouters.js'
 
 import notFoundMiddleware from './middleware/not-found.js'
 import errorHandlerMiddleware from './middleware/error-handler.js'
+
+if (process.env.NODE_ENV !== 'production') {
+  app.use(morgan('dev')) //`:method :url :status :response-time ms - :res[content-length]`
+} //`NODE_ENV is often used to specify whether the application is running in a development, staging, or production environment`
+//`By convention, the value of NODE_ENV is set to 'development' by default, but it can be set to other values depending on the environment`
 
 // app.use(cors()) //`see frontend 'Dashboard.js'(1)`
 app.use(express.json())
