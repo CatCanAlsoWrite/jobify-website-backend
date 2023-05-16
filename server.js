@@ -15,6 +15,7 @@ import jobRouters from './routers/jobRouters.js'
 
 import notFoundMiddleware from './middleware/not-found.js'
 import errorHandlerMiddleware from './middleware/error-handler.js'
+import authenticateUser from './middleware/authenticateUser.js'
 
 if (process.env.NODE_ENV !== 'production') {
   app.use(morgan('dev')) //`:method :url :status :response-time ms - :res[content-length]`
@@ -36,7 +37,8 @@ app.get('/api', (req, res) => {
   res.json({ msg: 'API' })
 }) //`see frontend 'Dashboard.js'(2)`
 app.use('/api/auth', authRouters)
-app.use('/api/job', jobRouters)
+// app.use('/api/job', jobRouters)
+app.use('/api/job', authenticateUser, jobRouters) //`use middleware to add authentication which can let only authenticated user do sth(more complicated method: add middleware 'authenticateUser' to every route in 'jobRouters.js')`
 
 app.use(notFoundMiddleware)
 app.use(errorHandlerMiddleware)

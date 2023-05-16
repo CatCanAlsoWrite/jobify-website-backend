@@ -1,5 +1,6 @@
 import User from '../models/User.js'
 import { StatusCodes } from 'http-status-codes'
+import authenticateUser from '../middleware/authenticateUser.js'
 
 /*(1)redundant code*/
 // const register = async (req, res) => {
@@ -154,6 +155,22 @@ const login = async (req, res) => {
 }
 
 const updateUser = async (req, res) => {
-  res.send('updateUser')
+  // res.send('updateUser')
+
+  // console.log(req.user) //`grab data from 'authenticateUser.js' middleware`
+  const { name, email, lastName, location } = req.body
+  if (!name || !email || !lastName || !location) {
+    throw new BadRequestError('Please provide all values')
+  }
+
+  const user = await User.findOne({ _id: req.user.userID })
+  user.name = name
+  user.email = email
+  user.lastName = lastName
+  user.location = location
+
+  await user.save() //`'save()' method was created in 'User.js'`
+
+  /*not necessary to 'createJWT()' again, but better to do that for the reason of get rid of old infos */
 }
 export { register, login, updateUser }
