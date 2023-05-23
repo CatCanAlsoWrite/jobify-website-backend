@@ -18,7 +18,7 @@ const authenticateUser = async (req, res, next) => {
   /*2.then choose token type 'Bearer' and add global token  manually in 'postman'-'Authorization'-'Token'-'save'-'send' in 'updateUser' page and other pages(which need authentications)*/
   const authHeader = req.headers.authorization
   // console.log(authHeader) //Bearer ...token...
-  if (!authHeader || !authHeader.startWith('Bearer')) {
+  if (!authHeader || !authHeader.startsWith('Bearer')) {
     throw new unauthenticatedError('Authentication Invalid')
   }
 
@@ -28,7 +28,7 @@ const authenticateUser = async (req, res, next) => {
 
     // console.log(payload) //{userID:... , iat:... ,exp:... } `'iat'/Issued At,means the time which jwt was issued; 'exp'/Expired, means the time which jwt must not be accepted for processing`
     req.user = { userID: payload.userID }
-    console.log(req.user) //{userID:...} `then can use 'req.user.userID' in 'authController.js' to add clue to '.findOne()' in pages (which need authentication)`
+    // console.log(req.user) //{userID:...} `then can use 'req.user.userID' in 'authController.js' to add clue to '.findOne()' in pages (which need authentication)`
 
     next()
   } catch (error) {

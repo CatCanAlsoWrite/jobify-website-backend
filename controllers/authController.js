@@ -163,6 +163,7 @@ const updateUser = async (req, res) => {
     throw new BadRequestError('Please provide all values')
   }
 
+  //(solution2): add condition to the method 'schema.pre' in 'User.js'
   const user = await User.findOne({ _id: req.user.userID })
   user.name = name
   user.email = email
@@ -172,5 +173,19 @@ const updateUser = async (req, res) => {
   await user.save() //`'save()' method was created in 'User.js'`
 
   /*not necessary to 'createJWT()' again, but better to do that for the reason of get rid of old infos */
+  const token = user.createJWT()
+  res.status(StatusCodes.OK).json({ user, token, location: user.location }) //`update in 'postman' calls an error, for the 'schema.pre' method defined a hashing password function before  '.save()' method in 'User.js', which will lead to a double hashed password`
+
+  //(solution1): change '.findOne()' to '.findOneAndUpdate()', then the method 'schema.pre' will not be triggered
+  // const user = await User.findOneAndUpdate({ _id: req.user.userID })
+  // user.name = name
+  // user.email = email
+  // user.lastName = lastName
+  // user.location = location
+
+  // await user.save()
+
+  // const token = user.createJWT()
+  // res.status(StatusCodes.OK).json({ user, token, location: user.location })
 }
 export { register, login, updateUser }

@@ -44,6 +44,15 @@ const UserSchema = new mongoose.Schema({
 /*use 'schema.pre' to create function which will be called before action 'save', use 'bcrypt' to hash password, then can hide it in the frontend/backend*/
 UserSchema.pre('save', async function () {
   // console.log(this.password)
+
+  //1.default setting, connect with (solution1) in 'authController.js'
+  // const salt = await bcrypt.genSalt(10)
+  // this.password = await bcrypt.hash(this.password, salt)
+
+  //2.add condition, connect with (solution2) in 'authController.js'
+  // console.log(this.modifiedPaths()) //['name'] `if modified name in 'postman' in 'updateUser' page`
+  // console.log(this.isModified('name')) //true `if modified name in 'postman' in 'updateUser' page`
+  if (!this.isModified('password')) return
   const salt = await bcrypt.genSalt(10)
   this.password = await bcrypt.hash(this.password, salt)
 })
